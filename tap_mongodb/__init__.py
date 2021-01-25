@@ -6,6 +6,7 @@ import sys
 import time
 import pymongo
 from bson import timestamp
+from urllib.parse import urlparse
 
 import singer
 from singer import metadata, metrics, utils
@@ -354,6 +355,9 @@ def main_impl():
         connection_params["ssl_cert_reqs"] = ssl.CERT_NONE
 
     url = config.get('database_url')
+    url_parsed = urlparse(url)
+    config['user'] = url_parsed.username
+    config['database'] = url_parsed.path[1:]
     client = pymongo.MongoClient(url)
 
 #     LOGGER.info('Connected to MongoDB host: %s, version: %s',
