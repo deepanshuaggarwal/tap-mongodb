@@ -19,11 +19,7 @@ import tap_mongodb.sync_strategies.incremental as incremental
 LOGGER = singer.get_logger()
 
 REQUIRED_CONFIG_KEYS = [
-    'host',
-    'port',
-    'user',
-    'password',
-    'database'
+    'database_url'
 ]
 
 IGNORE_DBS = ['system', 'local', 'config']
@@ -353,28 +349,16 @@ def main_impl():
     verify_mode = config.get('verify_mode', 'true') == 'true'
     use_ssl = config.get('ssl') == 'true'
 
-    connection_params = {"host": config['host'],
-                         "port": int(config['port']),
-                         "username": config.get('user', None),
-                         "password": config.get('password', None),
-                         "authSource": config['database'],
-                         "ssl": use_ssl,
-                         "replicaset": config.get('replica_set', None),
-                         "readPreference": 'secondaryPreferred'}
-
     # NB: "ssl_cert_reqs" must ONLY be supplied if `SSL` is true.
     if not verify_mode and use_ssl:
         connection_params["ssl_cert_reqs"] = ssl.CERT_NONE
 
-    url = config.get('connection_url', None)
-    if url:
-        client = pymongo.MongoClient(url)
-    else:
-        client = pymongo.MongoClient(**connection_params)
+    url = config.get('database_url')
+    client = pymongo.MongoClient(url)
 
-    LOGGER.info('Connected to MongoDB host: %s, version: %s',
-                config['host'],
-                client.server_info().get('version', 'unknown'))
+#     LOGGER.info('Connected to MongoDB host: %s, version: %s',
+#                 config['host'],
+#                 client.server_info().get('version', 'unknown'))
 
     common.INCLUDE_SCHEMAS_IN_DESTINATION_STREAM_NAME = \
         (config.get('include_schemas_in_destination_stream_name') == 'true')
