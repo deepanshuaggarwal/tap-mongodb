@@ -160,24 +160,15 @@ def produce_collection_schema(collection):
 
 def do_discover(client, config):
     streams = []
+    db_name = 'zluri'
+    collection_name = 'orguseractivity'
+    db = client[db_name]
 
-    for db_name in get_databases(client, config):
-        # pylint: disable=invalid-name
-        db = client[db_name]
-
-        collection_names = db.list_collection_names()
-        for collection_name in [c for c in collection_names
-                                if not c.startswith("system.")]:
-
-            collection = db[collection_name]
-            is_view = collection.options().get('viewOn') is not None
-            # TODO: Add support for views
-            if is_view:
-                continue
-
-            LOGGER.info("Getting collection info for db: %s, collection: %s",
-                        db_name, collection_name)
-            streams.append(produce_collection_schema(collection))
+    collection = db[collection_name]
+    
+    LOGGER.info("Getting collection info for db: %s, collection: %s",
+                db_name, collection_name)
+    streams.append(produce_collection_schema(collection))
 
     json.dump({'streams' : streams}, sys.stdout, indent=2)
 
