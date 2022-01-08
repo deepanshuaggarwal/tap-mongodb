@@ -228,7 +228,7 @@ def load_stream_projection(stream):
         return None
 
     try:
-        stream_projection = json.loads(stream_projection)
+        stream_projection = json.loads(json.dumps(stream_projection))
     except:
         err_msg = "The projection: {} for stream {} is not valid json"
         raise common.InvalidProjectionException(err_msg.format(stream_projection,
